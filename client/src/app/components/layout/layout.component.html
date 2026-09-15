@@ -1,0 +1,104 @@
+<div class="min-h-screen flex" *ngIf="!payroll.loading(); else loadingTpl">
+  <aside class="w-60 shrink-0 border-l border-base-700 bg-base-900 hidden md:flex flex-col">
+    <div class="px-5 py-6 border-b border-base-700">
+      <div class="font-display text-gold-400 text-lg font-semibold tracking-tight">GOLDEN STREAMERS</div>
+      <div class="text-xs text-ink-500 mt-0.5">نظام الرواتب</div>
+    </div>
+    <nav aria-label="القائمة الرئيسية" class="flex-1 py-4 px-3 flex flex-col gap-1"><ng-container *ngTemplateOutlet="navigation; context: { panelId: 'desktopPayrollNav' }"></ng-container></nav>
+    <div class="px-5 py-4 border-t border-base-700">
+      <div class="text-sm text-ink-300">{{ auth.user()?.name }}</div>
+      <div class="text-[11px] text-ink-700 mb-3">{{ auth.isAdmin() ? 'أدمن' : 'موظف' }}</div>
+      <button (click)="auth.logout()"
+        class="w-full inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-ink-300 hover:bg-base-800 hover:text-ink-100">
+        تسجيل خروج
+      </button>
+    </div>
+  </aside>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <header *ngIf="auth.user()?.role !== 'employee'" class="min-h-16 py-3 border-b border-base-700 bg-base-900/60 flex flex-wrap items-center justify-between px-3 sm:px-6 gap-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="text-xs text-ink-500">فترة الرواتب</span>
+        <select [ngModel]="payroll.currentPeriodId()" (ngModelChange)="onPeriodChange($event)"
+          class="bg-base-850 border border-base-700 rounded-md px-3 py-2 text-sm text-ink-100 focus-ring">
+          <option *ngFor="let p of payroll.periods()" [value]="p.id">
+            {{ p.label }} {{ p.status === 'closed' ? '· مقفولة' : '' }}
+          </option>
+        </select>
+
+        <ng-container *ngIf="auth.isAdmin()">
+          <button *ngIf="payroll.currentPeriod()?.status === 'open'"
+            (click)="payroll.closePeriod(payroll.currentPeriod()!.id)"
+            class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium border border-base-600 text-ink-300 hover:bg-base-800 hover:text-ink-100">
+            قفل الفترة
+          </button>
+        </ng-container>
+        <button *ngIf="auth.isAdmin() && payroll.isPeriodLocked()" (click)="reopenPeriod()" class="rounded-md px-3 py-2 text-sm bg-gold-500 text-base-950">إعادة فتح الفترة للتعديل</button>
+        <span *ngIf="payroll.currentPeriod()?.status === 'closed'" class="text-xs text-bad">هذه الفترة مقفولة — للعرض فقط</span>
+      </div>
+
+      <ng-container *ngIf="auth.isAdmin()">
+        <div *ngIf="adding(); else addBtn" class="flex items-center gap-2">
+          <input [(ngModel)]="newLabel" placeholder="اسم الفترة، مثلاً أكتوبر 2026"
+            class="bg-base-850 border border-base-700 rounded-md px-3 py-2 text-sm text-ink-100 focus-ring" />
+          <button (click)="createPeriod()" class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium bg-gold-500 text-base-950 hover:bg-gold-400">إنشاء</button>
+          <button (click)="adding.set(false)" class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-ink-300 hover:bg-base-800">إلغاء</button>
+        </div>
+        <ng-template #addBtn>
+          <button (click)="adding.set(true)" class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium border border-base-600 text-ink-300 hover:bg-base-800 hover:text-ink-100">
+            + فترة رواتب جديدة
+          </button>
+        </ng-template>
+      </ng-container>
+    </header>
+
+    <main class="flex-1 p-3 sm:p-6 overflow-auto">
+      <details class="md:hidden mb-4 border border-base-700 rounded-lg p-3">
+        <summary class="cursor-pointer text-gold-400">القائمة</summary>
+        <nav aria-label="قائمة الموبايل" class="grid gap-2 mt-3"><ng-container *ngTemplateOutlet="navigation; context: { panelId: 'mobilePayrollNav' }"></ng-container><button class="text-right py-2" (click)="auth.logout()">تسجيل خروج</button></nav>
+      </details>
+      <div *ngIf="payroll.error() && auth.user()?.role !== 'employee'" class="mb-4 text-sm text-bad bg-bad/10 border border-bad/20 rounded-md px-4 py-2.5">
+        {{ payroll.error() }}
+      </div>
+      <div *ngIf="!auth.loading() && !auth.isAdmin() && auth.user()?.role !== 'employee'" class="mb-4 p-3 rounded border border-base-700 text-sm text-ink-300" role="status">
+        حسابك بصلاحية موظف: تقدر تدخل الأداء في فترة مفتوحة. إضافة الأسماء ورفع Excel وإدارة الفترات تحتاج حساب أدمن.
+      </div>
+      <div *ngIf="!payroll.currentPeriod() && auth.user()?.role !== 'employee'" class="mb-4 p-3 rounded border border-gold-500 text-sm">
+        مفيش فترة رواتب محددة. {{ auth.isAdmin() ? 'اضغط + فترة رواتب جديدة علشان تبدأ إدخال البيانات.' : 'اطلب من الأدمن إنشاء فترة رواتب مفتوحة.' }}
+      </div>
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="min-h-screen flex items-center justify-center bg-base-950 text-ink-500 text-sm">
+    جاري تحميل البيانات من السيرفر...
+  </div>
+</ng-template>
+
+<ng-template #navigation let-panelId="panelId">
+  <ng-container *ngIf="auth.user()?.role !== 'employee'">
+  <a routerLink="/" routerLinkActive="bg-gold-500/10 text-gold-400" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-ink-300 hover:bg-base-800">
+    <span aria-hidden="true">◧</span> نظرة عامة
+  </a>
+  <button type="button" (click)="payrollExpanded.set(!payrollExpanded())" [attr.aria-expanded]="payrollExpanded()" [attr.aria-controls]="panelId" [class.text-gold-400]="payrollActive()" class="flex w-full items-center gap-3 px-3 py-2.5 rounded-md text-sm text-right hover:bg-base-800">
+    <span aria-hidden="true">◫</span><span class="flex-1">الرواتب</span><span aria-hidden="true">{{ payrollExpanded() ? '▼' : '◀' }}</span>
+  </button>
+  <div [id]="panelId" [hidden]="!payrollExpanded()" class="mr-5 border-r border-base-700 pr-2">
+    <a *ngFor="let item of payrollNav" [routerLink]="item.to" routerLinkActive="bg-gold-500/10 text-gold-400" ariaCurrentWhenActive="page" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-ink-300 hover:bg-base-800">
+      <span aria-hidden="true" class="opacity-70">{{ item.icon }}</span>{{ item.label }}
+    </a>
+  </div>
+  <a routerLink="/expenses" routerLinkActive="bg-gold-500/10 text-gold-400" ariaCurrentWhenActive="page" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-ink-300 hover:bg-base-800">
+    <span aria-hidden="true">▤</span> المصروفات
+  </a>
+  <a routerLink="/archive" routerLinkActive="bg-gold-500/10 text-gold-400" ariaCurrentWhenActive="page" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-ink-300 hover:bg-base-800"><span aria-hidden="true">▤</span> الأرشيف</a>
+  </ng-container>
+  <a *ngIf="auth.canAccessGameTracker()" routerLink="/game-tracker" routerLinkActive="bg-gold-500/10 text-gold-400" ariaCurrentWhenActive="page" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-ink-300 hover:bg-base-800">
+    <span aria-hidden="true">▦</span> Game Tracker
+  </a>
+  <a *ngIf="auth.canManage()" routerLink="/management" routerLinkActive="bg-gold-500/10 text-gold-400" ariaCurrentWhenActive="page" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-ink-300 hover:bg-base-800"><span aria-hidden="true">◇</span> Management</a>
+  <a routerLink="/attendance" routerLinkActive="bg-gold-500/10 text-gold-400" ariaCurrentWhenActive="page" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-ink-300 hover:bg-base-800"><span aria-hidden="true">◷</span> Attendance &amp; Work</a>
+  <a *ngIf="auth.isAdmin()" routerLink="/employee-accounts" routerLinkActive="bg-gold-500/10 text-gold-400" ariaCurrentWhenActive="page" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-ink-300 hover:bg-base-800"><span aria-hidden="true">♙</span> Employees</a>
+</ng-template>

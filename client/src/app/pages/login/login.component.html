@@ -1,0 +1,44 @@
+<div class="min-h-screen flex items-center justify-center bg-base-950 px-4">
+  <div class="w-full max-w-sm bg-base-900 border border-base-700 rounded-lg p-6">
+    <div class="mb-6 text-center">
+      <div class="font-display text-gold-400 text-lg font-semibold tracking-tight">GOLDEN STREAMERS</div>
+      <div class="text-xs text-ink-500 mt-1">نظام الرواتب</div>
+    </div>
+
+    <form (ngSubmit)="submit()" class="flex flex-col gap-4">
+      <label *ngIf="mode() === 'register'" class="flex flex-col gap-1.5">
+        <span class="text-xs text-ink-500">الاسم</span>
+        <input required [(ngModel)]="name" name="name"
+          class="bg-base-850 border border-base-700 rounded-md px-3 py-2 text-sm text-ink-100 focus-ring" />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-xs text-ink-500">الإيميل</span>
+        <input type="email" required [(ngModel)]="email" name="email"
+          class="bg-base-850 border border-base-700 rounded-md px-3 py-2 text-sm text-ink-100 focus-ring" />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-xs text-ink-500">الباسورد</span>
+        <input type="password" required minlength="6" [(ngModel)]="password" name="password"
+          class="bg-base-850 border border-base-700 rounded-md px-3 py-2 text-sm text-ink-100 focus-ring" />
+      </label>
+
+      <p *ngIf="error()" class="text-xs text-bad">{{ error() }}</p>
+
+      <button type="submit" [disabled]="busy()"
+        class="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium bg-gold-500 text-base-950 hover:bg-gold-400 disabled:opacity-40 mt-2">
+        {{ busy() ? '...' : (mode() === 'login' ? 'دخول' : 'إنشاء حساب') }}
+      </button>
+    </form>
+
+    <button type="button" (click)="toggleMode()"
+      class="text-xs text-ink-500 hover:text-gold-400 mt-5 w-full text-center">
+      {{ mode() === 'login' ? 'مفيش حساب؟ اعمل واحد' : 'عندك حساب؟ سجل دخول' }}
+    </button>
+
+    <p *ngIf="mode() === 'register'" class="text-[11px] text-ink-700 mt-3 text-center">
+      أول حساب بيتعمل على النظام بياخد صلاحية أدمن تلقائيًا.
+    </p>
+  </div>
+</div>

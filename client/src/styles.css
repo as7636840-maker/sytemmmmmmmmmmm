@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .card { @apply bg-base-900 rounded-xl p-5; box-shadow:0 2px 12px rgb(26 26 26 / .05); border:1px solid #eef0f2; }
+  .field { width:100%; border:1px solid #d1d5db; border-radius:8px; background:#fff; color:#1a1a1a; padding:10px 12px; margin-top:6px; }
+  .field:focus { outline:2px solid #d4a017; outline-offset:2px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; border:1px solid #d1d5db; border-radius:8px; padding:9px 16px; color:#1a1a1a; font-weight:500; background:#fff; }
+  .btn:hover { background:#f9fafb; }
+  .btn.primary { background:#d4a017; border-color:#d4a017; color:#1a1a1a; }
+  .badge { display:inline-flex; align-items:center; align-self:flex-start; padding:5px 10px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap; }
+  .badge.pending { color:#92400e; background:#fff7ed; border:1px solid #fed7aa; }
+  .badge.done { color:#fff; background:#16a34a; }
+  .badge.warning { color:#dc2626; background:#fef2f2; border:1px solid #fecaca; }
+  .resolved-row { background:#f0fdf4; }
+  .page-heading { display:flex; flex-wrap:wrap; justify-content:space-between; gap:16px; align-items:center; margin-bottom:24px; }
+  .page-heading h1 { font-size:28px; font-weight:600; letter-spacing:-.5px; }
+  .eyebrow { color:#946b0e; font-size:11px; letter-spacing:1.4px; font-weight:600; margin-bottom:8px; }
+}
+
+button:disabled { opacity:.5; cursor:not-allowed; }
+th,td { padding:14px 12px; text-align:start; border-bottom:1px solid #e5e7eb; vertical-align:top; }
+thead { background:#f9fafb; color:#6b7280; }
+th { font-size:12px; font-weight:600; }
+tbody tr:hover { background:#fffbeb; }
+aside { box-shadow:0 2px 12px rgb(26 26 26 / .03); }
+.bg-gold-500.text-base-950, .bg-gold-400.text-base-950 { color:#1a1a1a; }
+.text-red-400 { color:#dc2626; }
+dialog { box-shadow:0 20px 60px rgb(26 26 26 / .18); }
+
+@layer base {
+  html { color-scheme: light; }
+  body {
+    @apply bg-base-950 text-ink-100 font-body antialiased m-0;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #D1D5DB transparent;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+  input, select { color-scheme: light; }
+  table { font-variant-numeric: tabular-nums; }
+}
+
+@layer utilities {
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-gold-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-base-950;
+  }
+}
